@@ -1,27 +1,13 @@
-FROM python:3.8
+FROM python:3.12
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    python3-dev \
-    python3-pip \
-    nginx \
-    supervisor
+ENV PYTHONUNBUFFERED=1
 
-# Install Python dependencies
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
-
-# Install Gunicorn
-RUN pip install gunicorn
-
-# Copy application code
-COPY . /app
-
-# Set working directory
 WORKDIR /app
 
-# Expose ports
-EXPOSE 8000
+COPY requirements.txt /app/
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-# Start the application with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "mysite.wsgi:application"]
+COPY nginx/nginx.conf /etc/nginx/conf.d/
+
+COPY . /app/
